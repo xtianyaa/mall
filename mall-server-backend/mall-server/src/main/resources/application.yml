@@ -1,0 +1,40 @@
+server:
+  port: 8080
+  # 真机调试时需允许局域网访问，绑定 0.0.0.0
+  address: 0.0.0.0
+  # 支持至少 200 并发：Tomcat 工作线程与排队
+  tomcat:
+    threads:
+      max: 250
+    accept-count: 100
+
+spring:
+  application:
+    name: mall-server
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  # 支持至少 200 并发：数据库连接池（需配合 MySQL max_connections）
+  datasource:
+    hikari:
+      maximum-pool-size: 200
+      minimum-idle: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+yuan:
+  upload:
+    path: ./data/upload
+  # 小程序微信登录（code2Session）
+  wechat:
+    app-id: ${WECHAT_MINI_APP_ID:wxd96eb70c0e152e1c}
+    secret: ${WECHAT_MINI_SECRET:63789ee008e80798b51e303d5b3d2a6b}
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

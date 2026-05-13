@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MALL_DB_HOST:127.0.0.1}:${MALL_DB_PORT:33306}/${MALL_DB_NAME:mall0319}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: ${MALL_DB_USERNAME:root}
+    password: ${MALL_DB_PASSWORD:33taotao!}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/schema-mysql.sql
+      data-locations: classpath:sql/data-mysql.sql
+
+mybatis-plus:
+  global-config:
+    banner: false
+
+yuan:
+  admin:
+    jwt-ttl-ms: 7200000        # access 2 小时
+    jwt-refresh-ttl-ms: 7200000  # refresh 2 小时
+  wechat:
+    # 开发时在环境变量或本地配置中设置 WECHAT_MINI_APP_ID / WECHAT_MINI_SECRET
+    app-id: ${WECHAT_MINI_APP_ID:wxd96eb70c0e152e1c}
+    secret: ${WECHAT_MINI_SECRET:63789ee008e80798b51e303d5b3d2a6b}

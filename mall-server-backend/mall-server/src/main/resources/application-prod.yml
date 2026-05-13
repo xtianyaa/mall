@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MALL_DB_URL}
+    username: ${MALL_DB_USERNAME}
+    password: ${MALL_DB_PASSWORD}
+  sql:
+    init:
+      mode: never
+
+mybatis-plus:
+  global-config:
+    banner: false

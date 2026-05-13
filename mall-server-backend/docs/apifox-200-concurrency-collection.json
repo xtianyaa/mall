@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "mall-server 购物高峰期 200 并发压测",
+    "description": "聚焦下单相关：订单列表、订单详情、创建订单、支付成功等。小程序鉴权用 X-User-Id + X-Token；压测前在 DB 为测试用户写死 token（见文档 3.4），并配置 mini_user_id、mini_token、address_id、goods_id、order_id。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "admin_token", "value": "" },
+    { "key": "mini_user_id", "value": "20260309" },
+    { "key": "mini_token", "value": "stress-test-token" },
+    { "key": "address_id", "value": "1" },
+    { "key": "goods_id", "value": "1001" },
+    { "key": "order_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0-鉴权与准备",
+      "item": [
+        {
+          "name": "Admin登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"请替换为管理员账号\",\n  \"password\": \"请替换为密码\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mall/admin/login" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1-订单读（高并发读）",
+      "item": [
+        {
+          "name": "订单列表-200并发",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-User-Id", "value": "{{mini_user_id}}" },
+              { "key": "X-Token", "value": "{{mini_token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/mall/mini/order/list" }
+          }
+        },
+        {
+          "name": "订单详情-200并发",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-User-Id", "value": "{{mini_user_id}}" },
+              { "key": "X-Token", "value": "{{mini_token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/mall/mini/order/detail?orderId={{order_id}}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2-购物车",
+      "item": [
+        {
+          "name": "购物车列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-User-Id", "value": "{{mini_user_id}}" },
+              { "key": "X-Token", "value": "{{mini_token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/mall/mini/cart/list" }
+          }
+        },
+        {
+          "name": "加购-可用于混合压测",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-User-Id", "value": "{{mini_user_id}}" },
+              { "key": "X-Token", "value": "{{mini_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{mini_user_id}},\n  \"goodsId\": {{goods_id}},\n  \"quantity\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mall/mini/cart/add" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3-下单与支付（核心写，易成瓶颈）",
+      "item": [
+        {
+          "name": "直接下单-200并发",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-User-Id", "value": "{{mini_user_id}}" },
+              { "key": "X-Token", "value": "{{mini_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{mini_user_id}},\n  \"addressId\": {{address_id}},\n  \"totalAmount\": 19.90,\n  \"payAmount\": 19.90,\n  \"itemList\": [\n    { \"goodsId\": {{goods_id}}, \"name\": \"云南高山蓝莓\", \"price\": 19.90, \"quantity\": 1 }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mall/mini/order/create" }
+          }
+        },
+        {
+          "name": "从购物车下单-200并发",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-User-Id", "value": "{{mini_user_id}}" },
+              { "key": "X-Token", "value": "{{mini_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{mini_user_id}},\n  \"addressId\": {{address_id}}\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mall/mini/order/createFromCart" }
+          }
+        },
+        {
+          "name": "支付成功-200并发",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-User-Id", "value": "{{mini_user_id}}" },
+              { "key": "X-Token", "value": "{{mini_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{mini_user_id}},\n  \"orderId\": \"{{order_id}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mall/mini/order/pay/success" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4-管理端（备用）",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+            "url": { "raw": "{{baseUrl}}/mall/admin/dashboard" }
+          }
+        }
+      ]
+    }
+  ]
+}
